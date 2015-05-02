@@ -6,22 +6,22 @@ class Helper {
 		return json_decode(file_get_contents($feed), true);
 	}
 
-	static public function providers($providerJson){
-			// init response
-		$providers = array();
+	static public function providers($arrProviders = array()){
+		
+		$providers = array(); // init response
 
-		foreach (Helper::fetchFeed($providerJson) as $providerUrlIdx => $providerUrl){
-			$providers[] = Helper::fetchFeed($providerUrl);
+		foreach ($arrProviders as $pIdx => $p){
+			$providers[] = Helper::fetchFeed($p);
 		}
 
 		return $providers;
 	}
 
-	static public function datasets($providerJson){
+	static public function datasets($providers){
 			// init response
 		$datasets = array();
 
-		foreach (Helper::providers($providerJson) as $providerIdx => $provider){
+		foreach ($providers as $providerIdx => $provider){
 			foreach ($provider['datasets'] as $dIdx => $dataset){
 				$dataset['provider'] = $provider['shortname'];			
 				$datasets[] = $dataset;

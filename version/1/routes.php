@@ -19,22 +19,20 @@
 
 require_once('apiHelper.php');
 
-Flight::route('GET /api/providers', function(){
-
-	$providers = array(); // init response
-	foreach (Helper::providers(Flight::get('providersJson')) as $providerIdx => $provider){
-		unset($provider['datasets']); // remove datasets
-		$providers[] = $provider;
+Flight::route('GET /providers', function(){
+	$providers = array();
+	foreach (Helper::providers(Flight::get('providers')) as $pIdx => $p){
+		unset($p['datasets']); // remove datasets to save bandwith
+		$providers[] = $p;
 	}
-
 	Flight::json($providers);
 });
 
-Flight::route('GET /api/provider/@shortname', function($shortname){
+Flight::route('GET /provider/@shortname', function($shortname){
 	
 	$provider = array();
 
-	foreach (Helper::providers(Flight::get('providersJson')) as $providerIdx => $p){
+	foreach (Helper::providers(Flight::get('providers')) as $providerIdx => $p){
 		if ($p['shortname'] == $shortname){
 			$provider = $p;
 			break; // found the correct provider!
@@ -45,11 +43,11 @@ Flight::route('GET /api/provider/@shortname', function($shortname){
 });
 
 // GET::dataset (one by provider shortname and dataset accession)
-Flight::route('GET /api/provider/@shortname/@accession', function($shortname, $accession){
+Flight::route('GET /provider/@shortname/@accession', function($shortname, $accession){
 
 	$dataset = array();
 
-	foreach (Helper::datasets(Flight::get('providersJson')) as $dIdx => $d){
+	foreach (Helper::datasets(Helper::providers(Flight::get('providers'))) as $dIdx => $d){
 		if ( // find the matching dataset
 			((string) $d['provider'] == (string) $shortname) && 
 			((string) $d['accession'] == (string) $accession) 
@@ -63,23 +61,76 @@ Flight::route('GET /api/provider/@shortname/@accession', function($shortname, $a
 });
 
 // GET all datasets
-Flight::route('GET /api/datasets', function(){	
-	Flight::json(Helper::datasets(Flight::get('providersJson')));
+Flight::route('GET /datasets', function(){	
+	Flight::json(Helper::datasets(Helper::providers(Flight::get('providers'))));
 });
 
-// GET find dataset matching $query
-Flight::route('GET /api/datasets/@search', function($search){	
+/**
+ * GET find dataset matching $search
+ *
+ * $search supports the use of 'and' & 'or' syntax, including combinations
+ * 
+ * /datasets/mutation&Katayonn > all datasets that match both 'mutation' and 'Katayonn'
+ * /datasets/mutation Katayonn > all datasets that match 'mutation' and/or 'Katayonn'
+ * /datasets/mutation|Katayonn > all datasets that match 'mutation' and/or 'Katayonn' 
+ * 
+ **/
+Flight::route('GET /datasets/@search', function($search){	
 
 	$datasets = array();
+	$datasetTimestamps = array(); // used for sorting in the end
 	$needle = strtolower($search);
+	$orNeedles = array();
 
-	foreach(Helper::datasets(Flight::get('providersJson')) as $dIdx => $d){
+
+
+	if (strpos($needle, '|') >= 1){ // search for multiple words or combinations
+		$orNeedles = explode('|', $needle);
+	} elseif (strpos($needle, ' ') >= 1){ // search for multiple words or combinations
+		$orNeedles = explode(' ', $needle);		
+	} else { // search for a single keyword
+		$orNeedles[] = $needle;
+	}
+
+	foreach(Helper::datasets(Helper::providers(Flight::get('providers'))) as $dIdx => $d){
+
 		$haystack = strtolower('_'.json_encode($d));
-		if (stripos($haystack, $needle) >= 1) {
-			$datasets[] = $d;
+		foreach ($orNeedles as $needleIdx => $orNeedle){
+
+			// determine if there are & statements
+			if (strpos($orNeedle, '&') >= 1){
+				$andNeedles = explode('&', $needle);
+				$match = 0;
+				foreach ($andNeedles as $needleIdx => $andNeedle){				
+					if (stripos($haystack, $andNeedle) >= 1) {
+						$match++;
+					}
+				}
+				if ($match == count($andNeedles)){
+					$datasets[] = $d;
+				}
+			} else { // no 'and' statements
+				if (stripos($haystack, $orNeedle) >= 1) {
+					$datasets[] = $d;
+				}
+			}
+
 		}
 	}
-	
+
+	if (!empty($datasets)){ // make sure all are unique
+		$uniqueDatasets = array();
+		foreach ($datasets as $dIdx => $d){
+			if (!in_array($d, $uniqueDatasets)){
+				$datasetTimestamps[$dIdx]  = $d['timestamp']; // collect timestamps of unique datasets
+				$uniqueDatasets[] = $d;
+			}
+		}
+
+		$datasets = $uniqueDatasets;
+		array_multisort($datasetTimestamps, SORT_DESC, $datasets); // sort by timestamp desc
+	}
+
 	Flight::json($datasets);
 });
 

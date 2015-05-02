@@ -25,21 +25,16 @@ try {
 
 	// config
 	Flight::set('defaultApiVersion', '1');
-	Flight::set('providersJson', 'http://'.$_SERVER['HTTP_HOST'].'/providers');
+	Flight::set('providers', array(
+		"http://feeds.metabolomexchange.org/metabolomics-workbench.php",
+		"http://feeds.metabolomexchange.org/metabolights.php",
+		"http://feeds.metabolomexchange.org/golm.php",
+		"http://feeds.metabolomexchange.org/meryb.php"
+	));
 
 	// homepage with basic how to
 	Flight::route('GET /', function(){ Flight::render('home.php', array()); });
 	
-	// default provider urls
-	Flight::route('GET /providers', function(){
-		$providers = array();
-		$providers[] = "http://feeds.metabolomexchange.org/metabolomics-workbench.php";
-		$providers[] = "http://feeds.metabolomexchange.org/metabolights.php";
-		$providers[] = "http://feeds.metabolomexchange.org/golm.php";
-		$providers[] = "http://feeds.metabolomexchange.org/meryb.php";
-		Flight::json($providers);
-	});
-
 	// define API routes based on version
 	$apiVersion = Flight::get('defaultApiVersion');
 
