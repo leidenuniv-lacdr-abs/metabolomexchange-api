@@ -26,10 +26,10 @@ try {
 	// config
 	Flight::set('defaultApiVersion', '1');
 	Flight::set('providers', array(
-		"http://feeds.metabolomexchange.org/metabolomics-workbench.php",
-		"http://feeds.metabolomexchange.org/metabolights.php",
 		"http://feeds.metabolomexchange.org/golm.php",
-		"http://feeds.metabolomexchange.org/meryb.php"
+		"http://feeds.metabolomexchange.org/meryb.php",
+		"http://feeds.metabolomexchange.org/metabolomics-workbench.php",
+		"http://feeds.metabolomexchange.org/metabolights.php"
 	));
 
 	// homepage with basic how to
@@ -56,7 +56,14 @@ try {
 }	
 
 // ERROR fallback
-Flight::route('*', function(){ Flight::json(array('error'=>'page not found!', 'stacktrace' => (Flight::get('error_message')) ? Flight::get('error_message') : '' ));	exit(); });
+Flight::route('*', function(){ 
+	Flight::json(
+		array(
+			'error'=>'page not found!', 
+			'stacktrace' => (Flight::get('error_message')) ? Flight::get('error_message') : '' )
+		);	
+	exit(); 
+});
 
 // lift off
 Flight::start();
