@@ -22,7 +22,6 @@ require_once('apiHelper.php');
 Flight::route('GET /providers', function(){
 	$providers = array();
 	foreach (Helper::providers(Flight::get('providers')) as $pIdx => $p){
-		unset($p['datasets']); // remove datasets to save bandwith
 		$providers[] = $p;
 	}
 	Flight::json($providers);
