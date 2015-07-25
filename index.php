@@ -26,29 +26,45 @@ try {
 	// config
 	Flight::set('defaultApiVersion', '1');
 	Flight::set('providers', array(
-		"http://feeds.metabolomexchange.org/golm.php",
-		"http://feeds.metabolomexchange.org/meryb.php",
-		"http://feeds.metabolomexchange.org/metabolomics-workbench.php",
-		"http://feeds.metabolomexchange.org/metabolights.php"
+		"golm" => "http://feeds.metabolomexchange.org/golm.php",
+		"meryb" => "http://feeds.metabolomexchange.org/meryb.php",
+		"mwbs" => "http://feeds.metabolomexchange.org/metabolomics-workbench.php",
+		"mtbls" => "http://feeds.metabolomexchange.org/metabolights.php"
 	));
 
 	// homepage with basic how to
 	Flight::route('GET /', function(){ Flight::render('home.php', array()); });
 	
 	// define API routes based on version
-	$apiVersion = Flight::get('defaultApiVersion');
+	Flight::set('apiVersion', Flight::get('defaultApiVersion'));
 
 	// see if we overwrite the default version of the api
 	if (isset(Flight::request()->query->version)){ 
-		$apiVersion = Flight::request()->query->version; 
+		Flight::set('apiVersion', Flight::request()->query->version);
 	}
 
 	// determine the location of the api methods to expose
-	$apiVersionRoutes = 'version/'.$apiVersion.'/routes.php';
-	if (file_exists($apiVersionRoutes)){ 
-		require_once('version/'.$apiVersion.'/routes.php');
+	Flight::set('apiVersionRoot', 'version/'. Flight::get('apiVersion') .'/');
+
+	// set cache folder
+	Flight::set('useCache', false);
+	Flight::set('apiVersionCacheRoot', Flight::get('apiVersionRoot') .'/.cache/');
+	if (!is_dir(Flight::get('apiVersionCacheRoot'))){
+		try {
+			mkdir(Flight::get('apiVersionCacheRoot'), 0777, true);
+			Flight::set('useCache', true);
+		} catch (Exception $e){
+			echo $e;
+			exit();
+			Flight::set('useCache', false);
+		}
+	}
+
+	Flight::set('apiVersionRoutes', Flight::get('apiVersionRoot') . 'routes.php');
+	if (file_exists(Flight::get('apiVersionRoutes'))){ 
+		require_once(Flight::get('apiVersionRoutes'));
 	} else {
-		throw new Exception('Unknown api version ('. $apiVersion .')');
+		throw new Exception('Unknown api route(s) ('. Flight::get('apiVersionRoutes') .')');
 	}
 
 } catch (Exception $e) {

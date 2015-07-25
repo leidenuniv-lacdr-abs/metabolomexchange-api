@@ -29,14 +29,10 @@ Flight::route('GET /providers', function(){
 
 Flight::route('GET /provider/@shortname', function($shortname){
 	
-	$provider = array();
-
-	foreach (Helper::providers(Flight::get('providers')) as $providerIdx => $p){
-		if ($p['shortname'] == $shortname){
-			$provider = $p;
-			break; // found the correct provider!
-		}
-	}
+	$providers = Flight::get('providers');
+	
+	$provider = Helper::fetchFeed($providers[$shortname]);
+	$provider['shortname'] = $shortname;
 
 	Flight::json($provider);
 });
@@ -46,13 +42,14 @@ Flight::route('GET /provider/@shortname/@accession', function($shortname, $acces
 
 	$dataset = array();
 
-	foreach (Helper::datasets(Helper::providers(Flight::get('providers'))) as $dIdx => $d){
-		if ( // find the matching dataset
-			((string) $d['provider'] == (string) $shortname) && 
-			((string) $d['accession'] == (string) $accession) 
-		){
-			$dataset = $d;
+	$providers = Flight::get('providers');
+	$provider = Helper::fetchFeed($providers[$shortname]);
+	foreach ($provider['datasets'] as $dIdx => $dataset){
+		if ((string) $dataset['accession'] == (string) $accession){
+			$dataset['provider'] = $shortname;
 			break; // found the correct dataset!
+		} else {
+			$dataset = array();
 		}
 	}
 	
@@ -61,7 +58,7 @@ Flight::route('GET /provider/@shortname/@accession', function($shortname, $acces
 
 // GET all datasets
 Flight::route('GET /datasets', function(){	
-	Flight::json(Helper::datasets(Helper::providers(Flight::get('providers'))));
+	Flight::json(Helper::datasets(Flight::get('providers')));
 });
 
 /**
@@ -81,8 +78,6 @@ Flight::route('GET /datasets/@search', function($search){
 	$needle = strtolower($search);
 	$orNeedles = array();
 
-
-
 	if (strpos($needle, '|') >= 1){ // search for multiple words or combinations
 		$orNeedles = explode('|', $needle);
 	} elseif (strpos($needle, ' ') >= 1){ // search for multiple words or combinations
@@ -91,7 +86,7 @@ Flight::route('GET /datasets/@search', function($search){
 		$orNeedles[] = $needle;
 	}
 
-	foreach(Helper::datasets(Helper::providers(Flight::get('providers'))) as $dIdx => $d){
+	foreach(Helper::datasets(Flight::get('providers')) as $dIdx => $d){
 
 		$haystack = strtolower('_'.json_encode($d));
 		foreach ($orNeedles as $needleIdx => $orNeedle){

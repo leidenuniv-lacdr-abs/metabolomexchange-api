@@ -6,29 +6,35 @@ class Helper {
 		return json_decode(file_get_contents($feed), true);
 	}
 
-	static public function providers($arrProviders = array()){
+	static public function providers($providers = array()){
 		
-		$providers = array(); // init response
+		// init response		
+		$response = array(); // init response
 
-		foreach ($arrProviders as $pIdx => $p){
-			$providers[] = Helper::fetchFeed($p);
+		foreach ($providers as $pIdx => $p){
+			$feed = Helper::fetchFeed($p);
+			unset($feed['datasets']);
+			$feed['shortname'] = $pIdx;
+			$response[] = $feed;
 		}
 
-		return $providers;
+		return $response;
 	}
 
-	static public function datasets($providers){
-			// init response
-		$datasets = array();
+	static public function datasets($providers = array()){
+		
+		// init response		
+		$response = array(); // init response
 
-		foreach ($providers as $providerIdx => $provider){
-			foreach ($provider['datasets'] as $dIdx => $dataset){
-				$dataset['provider'] = $provider['shortname'];			
-				$datasets[] = $dataset;
+		foreach ($providers as $pIdx => $p){
+			$feed = Helper::fetchFeed($p);
+			foreach ($feed['datasets'] as $dIdx => $dataset){
+				$dataset['provider'] = $pIdx;
+				$response[] = $dataset;
 			}
 		}
 
-		return $datasets;
+		return $response;
 	}	
 
 }
