@@ -33,7 +33,21 @@ try {
 	));
 
 	// homepage with basic how to
-	Flight::route('GET /', function(){ Flight::render('home.php', array()); });
+	Flight::route('GET /', function(){ 
+
+		$versions = array();
+		$versionsRoot = 'version';
+		$versionDirectories = scandir($versionsRoot);
+		foreach ($versionDirectories as $vdIdx => $versionDirectory){
+			$version = $versionsRoot . DIRECTORY_SEPARATOR . $versionDirectory;
+			$readme = $version . DIRECTORY_SEPARATOR . 'README';
+			if (is_dir($version) && is_file($readme)){
+				$versions[] = array('version'=>$versionDirectory, 'readme'=>file_get_contents($readme));
+			}
+		}
+
+		Flight::render('home.php', array('versions'=>$versions)); 
+	});
 	
 	// define API routes based on version
 	Flight::set('apiVersion', Flight::get('defaultApiVersion'));
@@ -60,16 +74,30 @@ try {
 		}
 	}
 
-	Flight::set('apiVersionRoutes', Flight::get('apiVersionRoot') . 'routes.php');
+	// try to load the correct logic for the version of the api
+	Flight::set('apiVersionRoutes', Flight::get('apiVersionRoot') . 'api.php');
 	if (file_exists(Flight::get('apiVersionRoutes'))){ 
 		require_once(Flight::get('apiVersionRoutes'));
 	} else {
 		throw new Exception('Unknown api route(s) ('. Flight::get('apiVersionRoutes') .')');
 	}
 
+
+	// implementation of (required) routes
+	Flight::route('GET /providers', array('Api','providers'));
+	Flight::route('GET /provider/@shortname', array('Api','provider'));
+	
+	Flight::route('GET /datasets', array('Api','datasets'));
+	Flight::route('GET /dataset/@shortname/@accession', array('Api','dataset'));	
+	Flight::route('GET /datasets/@search', array('Api','search'));
+	
+	Flight::route('GET /stats', array('Api','stats'));
+
+
 } catch (Exception $e) {
 	Flight::set('error_message', $e->getMessage());
 }	
+
 
 // ERROR fallback
 Flight::route('*', function(){ 
