@@ -31,23 +31,6 @@ try {
 		"mwbs" => "http://feeds.metabolomexchange.org/metabolomics-workbench.php",
 		"mtbls" => "http://feeds.metabolomexchange.org/metabolights.php"
 	));
-
-	// homepage with basic how to
-	Flight::route('GET /', function(){ 
-
-		$versions = array();
-		$versionsRoot = 'version';
-		$versionDirectories = scandir($versionsRoot);
-		foreach ($versionDirectories as $vdIdx => $versionDirectory){
-			$version = $versionsRoot . DIRECTORY_SEPARATOR . $versionDirectory;
-			$readme = $version . DIRECTORY_SEPARATOR . 'README';
-			if (is_dir($version) && is_file($readme)){
-				$versions[] = array('version'=>$versionDirectory, 'readme'=>file_get_contents($readme));
-			}
-		}
-
-		Flight::render('home.php', array('versions'=>$versions)); 
-	});
 	
 	// define API routes based on version
 	Flight::set('apiVersion', Flight::get('defaultApiVersion'));
@@ -82,6 +65,28 @@ try {
 		throw new Exception('Unknown api route(s) ('. Flight::get('apiVersionRoutes') .')');
 	}
 
+
+	// homepage with basic how to
+	Flight::route('GET /', function(){ 
+
+		$versions = array();
+		$versionsRoot = 'version';
+		$versionDirectories = scandir($versionsRoot);
+		foreach ($versionDirectories as $vdIdx => $versionDirectory){
+			$version = $versionsRoot . DIRECTORY_SEPARATOR . $versionDirectory;
+			$readmeFile = $version . DIRECTORY_SEPARATOR . 'README';
+			if (is_dir($version) && is_file($readmeFile)){
+				$readmeText = file_get_contents($readmeFile);
+				$versions[] = array('version'=>$versionDirectory, 'readme'=>$readmeText);
+
+				if (Flight::get('apiVersion') == $versionDirectory){
+					$readme = $readmeText;
+				}
+			}
+		}
+
+		Flight::render('home.php', array('versions'=>$versions, 'readme'=>$readme, 'apiVersion'=>Flight::get('apiVersion'))); 
+	});
 
 	// implementation of (required) routes
 	Flight::route('GET /providers', array('Api','providers'));
