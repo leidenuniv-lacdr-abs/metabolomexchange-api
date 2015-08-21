@@ -85,7 +85,7 @@ try {
 			}
 		}
 
-		Flight::render('home.php', array('versions'=>$versions, 'readme'=>$readme, 'apiVersion'=>Flight::get('apiVersion'))); 
+		Flight::render('home.php', array('versions'=>$versions, 'readme'=>$readme, 'defaultApiVersion'=>Flight::get('defaultApiVersion') , 'apiVersion'=>Flight::get('apiVersion'))); 
 	});
 
 	// implementation of (required) routes
