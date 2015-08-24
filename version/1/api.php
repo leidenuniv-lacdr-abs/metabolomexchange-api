@@ -102,7 +102,7 @@ class Api {
      * @ApiReturnHeaders(sample="HTTP 200 OK")
      * @ApiReturn(type="object", sample="{}")
      */	
-	public static function datasets($shortname, $accession) {
+	public static function datasets() {
 		Flight::json(Helper::datasets(Flight::get('providers')));
     }        
 
