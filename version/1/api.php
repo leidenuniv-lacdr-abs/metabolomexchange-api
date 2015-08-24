@@ -109,13 +109,13 @@ class Api {
     /**
      * @ApiDescription(section="dataset", description="Find datasets matching $search")
      * @ApiMethod(type="get")
-     * @ApiRoute(name="/dataset/search/{search}")
+     * @ApiRoute(name="/datasets/{search}")
      * @ApiParams(name="search", type="string", nullable=false, description="
 	 * $search supports the use of 'and' & 'or' syntax, including combinations
 	 * 
-	 * /datasets/mutation&Katayonn > all datasets that match both 'mutation' and 'Katayonn'
-	 * /datasets/mutation Katayonn > all datasets that match 'mutation' and/or 'Katayonn'
-	 * /datasets/mutation|Katayonn > all datasets that match 'mutation' and/or 'Katayonn'     
+	 * /datasets/mutation&Katayonn > all datasets that match both 'mutation' and 'Katayonn'.
+	 * /datasets/mutation Katayonn > all datasets that match 'mutation' and/or 'Katayonn'.
+	 * /datasets/mutation|Katayonn > all datasets that match 'mutation' and/or 'Katayonn'.    
      * ")
      * @ApiReturnHeaders(sample="HTTP 200 OK")
      * @ApiReturn(type="object", sample="{}")
