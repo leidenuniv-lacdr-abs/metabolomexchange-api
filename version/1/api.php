@@ -109,7 +109,7 @@ class Api {
     /**
      * @ApiDescription(section="dataset", description="Find datasets matching $search")
      * @ApiMethod(type="get")
-     * @ApiRoute(name="/search/{search}")
+     * @ApiRoute(name="/dataset/search/{search}")
      * @ApiParams(name="search", type="string", nullable=false, description="
 	 * $search supports the use of 'and' & 'or' syntax, including combinations
 	 * 
