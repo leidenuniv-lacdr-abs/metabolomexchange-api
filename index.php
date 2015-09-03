@@ -25,6 +25,7 @@ try {
 
 	// config
 	Flight::set('defaultApiVersion', '1');
+	Flight::set('defaultRoot', '/tmp/');
 	Flight::set('providers', array(
 		"golm" => "http://feeds.metabolomexchange.org/golm.php",
 		"meryb" => "http://feeds.metabolomexchange.org/meryb.php",
@@ -45,14 +46,13 @@ try {
 
 	// set cache folder
 	Flight::set('useCache', false);
-	Flight::set('apiVersionCacheRoot', Flight::get('apiVersionRoot') .'/.cache/');
+	Flight::set('apiVersionCacheRoot', Flight::get('defaultRoot') . Flight::get('apiVersionRoot') .'/.cache/');
 	if (!is_dir(Flight::get('apiVersionCacheRoot'))){
 		try {
 			mkdir(Flight::get('apiVersionCacheRoot'), 0777, true);
 			Flight::set('useCache', true);
 		} catch (Exception $e){
 			echo $e;
-			exit();
 			Flight::set('useCache', false);
 		}
 	}
