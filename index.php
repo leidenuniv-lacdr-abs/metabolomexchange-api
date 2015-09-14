@@ -27,7 +27,7 @@ try {
 	Flight::set('defaultApiVersion', '1');
 	Flight::set('defaultRoot', '/tmp/');
 	Flight::set('providers', array(
-		"golm" => "http://feeds.metabolomexchange.org/golm.php",
+		// DISABLED: MOVED TO MTBLS "golm" => "http://feeds.metabolomexchange.org/golm.php",
 		"meryb" => "http://feeds.metabolomexchange.org/meryb.php",
 		"mwbs" => "http://feeds.metabolomexchange.org/metabolomics-workbench.php",
 		"mtbls" => "http://feeds.metabolomexchange.org/metabolights.php"
