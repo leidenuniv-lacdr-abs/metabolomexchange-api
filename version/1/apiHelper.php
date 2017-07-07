@@ -79,8 +79,9 @@ class Helper {
 		foreach (array_reverse($datasets) as $dIdx => $dataset){
 			
 			$providerName = $providerDetails[$dataset['provider']]['name'];
-			$year = (int) date("Y", $dataset['timestamp']);			
-			$month = (int) date("m", $dataset['timestamp']);
+			$ts = $dataset['timestamp'] ? $dataset['timestamp'] : 0;
+			$year = (int) date("Y", $ts);			
+			$month = (int) date("m", $ts);
 
 			// update helper veriables
 			if ($lowestYear > $year){ $lowestYear = $year; }
