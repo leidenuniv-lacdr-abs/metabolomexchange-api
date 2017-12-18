@@ -1,14 +1,14 @@
 <?php
 /**
- * Copyright 2015 Michael van Vliet (Leiden University), Thomas Hankemeier 
+ * Copyright 2015 Michael van Vliet (Leiden University), Thomas Hankemeier
  * (Leiden University)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * 		http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,14 +30,16 @@ try {
 		// DISABLED: MOVED TO MTBLS "golm" => "http://feeds.metabolomexchange.org/golm.php",
 		"meryb" => "http://feeds.metabolomexchange.org/meryb.php",
 		"mwbs" => "http://feeds.metabolomexchange.org/metabolomics-workbench.php",
-		"mtbls" => "http://feeds.metabolomexchange.org/metabolights.php"
+		"mtbls" => "http://feeds.metabolomexchange.org/metabolights.php",
+		"mnote" => "http://feeds.metabolomexchange.org/metabolonote.php"
+
 	));
-	
+
 	// define API routes based on version
 	Flight::set('apiVersion', Flight::get('defaultApiVersion'));
 
 	// see if we overwrite the default version of the api
-	if (isset(Flight::request()->query->version)){ 
+	if (isset(Flight::request()->query->version)){
 		Flight::set('apiVersion', Flight::request()->query->version);
 	}
 
@@ -59,7 +61,7 @@ try {
 
 	// try to load the correct logic for the version of the api
 	Flight::set('apiVersionRoutes', Flight::get('apiVersionRoot') . 'api.php');
-	if (file_exists(Flight::get('apiVersionRoutes'))){ 
+	if (file_exists(Flight::get('apiVersionRoutes'))){
 		require_once(Flight::get('apiVersionRoutes'));
 	} else {
 		throw new Exception('Unknown api route(s) ('. Flight::get('apiVersionRoutes') .')');
@@ -67,7 +69,7 @@ try {
 
 
 	// homepage with basic how to
-	Flight::route('GET /', function(){ 
+	Flight::route('GET /', function(){
 
 		$versions = array();
 		$versionsRoot = 'version';
@@ -85,33 +87,33 @@ try {
 			}
 		}
 
-		Flight::render('home.php', array('versions'=>$versions, 'readme'=>$readme, 'defaultApiVersion'=>Flight::get('defaultApiVersion') , 'apiVersion'=>Flight::get('apiVersion'))); 
+		Flight::render('home.php', array('versions'=>$versions, 'readme'=>$readme, 'defaultApiVersion'=>Flight::get('defaultApiVersion') , 'apiVersion'=>Flight::get('apiVersion')));
 	});
 
 	// implementation of (required) routes
 	Flight::route('GET /providers', array('Api','providers'));
 	Flight::route('GET /provider/@shortname', array('Api','provider'));
-	
+
 	Flight::route('GET /datasets', array('Api','datasets'));
-	Flight::route('GET /dataset/@shortname/@accession', array('Api','dataset'));	
+	Flight::route('GET /dataset/@shortname/@accession', array('Api','dataset'));
 	Flight::route('GET /datasets/@search', array('Api','search'));
-	
+
 	Flight::route('GET /stats', array('Api','stats'));
 
 
 } catch (Exception $e) {
 	Flight::set('error_message', $e->getMessage());
-}	
+}
 
 
 // ERROR fallback
-Flight::route('*', function(){ 
+Flight::route('*', function(){
 	Flight::json(
 		array(
-			'error'=>'page not found!', 
+			'error'=>'page not found!',
 			'stacktrace' => (Flight::get('error_message')) ? Flight::get('error_message') : '' )
-		);	
-	exit(); 
+		);
+	exit();
 });
 
 // lift off
